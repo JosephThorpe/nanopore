@@ -22,7 +22,7 @@ A complete sequencing run on the MinION platform can generate upwards to of 1TB 
 
 ![ngs3](../img/ngs3.png)
 
-The long reads that athe
+The long reads that are generated from nanopore are perfect for De novo assembly purposes, due to the way that they span repetitive regions and structural variants, making it easier to reconstruct genomes with fewer gaps and higher contiguity compared to short-read sequencing. So in this practical we will run through long read and hybrid assemblies to compare with our previous assemblies using just short reads.
 
 ## Activity Briefing
 
@@ -186,6 +186,10 @@ firefox krona.html
 From the plot you'll notice that the sample is nearly completely clean of contaminants, and therefore does not need and further filtering.
 
 ## De novo Assembly
+
+### long only
+
+### hybrid
 
 
 
