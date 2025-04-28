@@ -148,7 +148,7 @@ The outcome of de novo assembly is a set of contigs and a scaffolded sequence. I
 We can compute these statistics with the help of a tool called QUAST (made by the same developers as spades). To get the statistics first navigate to the assembly directory and run `quast`
 
 ```
-quast -r tb.fasta -o quast/short short/scaffolds.fasta 
+quast -r tbdb.fasta -o quast/short short/scaffolds.fasta 
 ```
 
 After it has finished you can examine the outputs. To view the result, open up the html in the browser of your choice.
@@ -292,7 +292,7 @@ Knowing the expected genome size is beneficial for Flye assembly. Ideally, this 
 Now we have run flye we can check out our N50 using quast again.
 
 ```
-quast -r tb.fasta -o quast_long long/scaffolds.fasta 
+quast -r tbdb.fasta -o quast_long long/scaffolds.fasta 
 ```
 
 Dont forget to also run BUSCO to get the BUSCO score.
