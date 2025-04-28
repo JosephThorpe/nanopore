@@ -6,7 +6,7 @@ We have already explored mapping, where the sequence data is aligned to a known 
 
 De novo assembly is the process of reconstruction of the sample genome sequence without comparison to other genomes. It follows a bottom-up strategy by which reads are overlapped and grouped into contigs. Contigs are joined into scaffolds covering, ideally, the whole of each chromosome in the organism. However de novo assembly from next generation sequence (NGS) data faces several challenges. Read lengths are short and therefore detectable overlap between reads is lower and repeat regions harder to resolve. Longer read lengths will overcome these limitations but this is technology limited. These issues can also be overcome by increasing the coverage depth, i.e. the number of reads over each part of the genome. The higher the coverage then the greater the chance of observing overlaps among reads to create larger contigs and being able to span short repeat regions. 
 
-There are three different ways to assemble a genome depending on the data you have. Short-read assembly for short illumina data, long read assembly for pacbio or oxford nanopore data, and hybrid assemblies, for using the short or long read to map and using the opposite data to polish and fill the gaps. Each method uses its own graph theory to construct the genome.
+There are three different ways to assemble a genome depending on the data you have. Short-read assembly for illumina data, long read assembly for pacbio or oxford nanopore data, and hybrid assemblies, for using the short or long read to map and using the opposite data to polish and fill the gaps. Each method uses its own graph theory to construct the genome.
 
 Graph theory is a branch of discrete mathematics that studies problems of graphs. Graphs are sets of points called ‘vertices’ or ‘nodes’ joined by lines called ‘edges’. In the graph to the left there are 6 nodes and 7 edges. The edges are unidirectional which means that they can only be traversed in the direction of the arrow. For example paths in this graph include 3-2-5-1, 3-4-6 and 3-2-1.
 
@@ -55,7 +55,7 @@ In conclusion, the de Bruijn graph assemblers are more appropriate for large amo
 
 ## Exercise 1: _De novo_ Comparing different assemblies
 
-_De novo_ assembly is one the most computationally demanding processes in bioinformatics. Large genomes require many hours or days of processing. A small bacterial genome may take up to several hours to assemble. Here we will assemble M. tuberculosis genomes using Spades (Bankevich et al, 2012). We will compute assembly statistics to check the quality, and review how resulting contigs can be aligned, ordered and orientated along the reference genome using Abacas (Assefa, Keane, Otto, Newbold, & Berriman, 2009).
+_De novo_ assembly is one of the most computationally demanding processes in bioinformatics. Large genomes require many hours or days of processing. A small bacterial genome may take up to several hours to assemble. Here we will assemble M. tuberculosis genomes using Spades (Bankevich et al, 2012). We will compute assembly statistics to check the quality, and review how resulting contigs can be aligned, ordered and orientated along the reference genome using Abacas (Assefa, Keane, Otto, Newbold, & Berriman, 2009).
 
 ### Quick start and data checks
 
@@ -87,7 +87,7 @@ If you are creating a novel genome, you might not know what is the genome size y
 
 Jellyfish is a tool that can estimate the genome size by analysing the frequency of short sequences (K-mers) within a set of unassembled sequencing reads. Jellyfish can provide an estimate of the total number of unique sequences present, which directly correlates with the genome size (Genome size = total number of K-mers/average K-mer coverage). Higher frequency k-mers often represent repetitive regions, while the peak frequency of k-mers found in lower copy numbers can be used to infer the overall genome size. Tools like GenomeScope can then take the output from Jellyfish to provide a more refined estimate and insights into genome characteristics like heterozygosity and repeat content, all before a full genome assembly is even attempted.
 
-Lets run jellyfish
+Let's run jellyfish
 
 ```
 jellyfish count -C -m 21 -s 100M -t 10 -o reads.jf <(zcat tb_ILL/*.fastq.gz)
@@ -95,18 +95,20 @@ jellyfish count -C -m 21 -s 100M -t 10 -o reads.jf <(zcat tb_ILL/*.fastq.gz)
 jellyfish histo reads.jf > reads.histo
 ```
 
-Now we have create our reads.histo, we can use it to plot a k-mer frequency distribution plot.
+Now we have created our reads.histo, we can use it to plot a k-mer frequency distribution plot.
 
-If you have familiar abilities with a programming language, you can plot these yourself, and calculate the genome size yourself using the above formula. Although, GenomeScope is widely used to plot this and will also tell you your estimated genome size. Load up GenomeScope and take a look http://genomescope.org/genomescope2.0/.
+If you have familiarity with a programming language, you can plot these yourself, and calculate the genome size yourself using the above formula. Although, GenomeScope is widely used to plot this and will also tell you your estimated genome size. Load up GenomeScope and take a look http://genomescope.org/genomescope2.0/.
 
 
 !!! question
     === "Question 1"
         What do you notice from GenomeScope, what is our estimated genome size?
     === "Answer 1"
-        The estimated genome size given to us will be around 4.1mb, which is slightly shorter than the actual 4.4mb size that is MTB, but it wont be perfect and this just gives us a good guidance of what to expect.
+        The estimated genome size given to us will be around 4.1mb, which is slightly shorter than the actual 4.4mb size that is MTB, but it won't be perfect and this just gives us a good guidance on what to expect
 
 ### Running Spades
+
+Spades is a genome assembly tool that is specifically designed for assembling short reads from high-throughput sequencing technologies. It uses a combination of de Bruijn graph-based assembly strategies and other techniques to produce high-quality genome assemblies
 
 Spades is implemented in a single program that performs several steps in the assembly pipeline with a single command. The options are explained by running the command with no parameters (spades.py):
 
@@ -123,7 +125,7 @@ De novo assembly gives much better results if reads are aggressively pre-filtere
 
 Although anecdotal recommendations for the k-mer length range from lower than half of the read length up to 80% of read length, the parameter is difficult to determine in advance since it depends on coverage, read length, error rates and the sample properties (repeat regions, etc). Therefore, it is advisable to perform several assemblies using different values of k-mer length to decide a value.
 
-Spades automatically chooses a range of k-mer lengths to test and chooses the best one. The pipeline also performs reads correction, which aims to correct random errors in reads which will have a knock on effect on the k-mers used in the assembly. For time purposes we have selected a kmer of 55 insted of spades' automatic test of multiple.
+Spades automatically chooses a range of k-mer lengths to test and chooses the best one. The pipeline also performs reads correction, which aims to correct random errors in reads which will have a knock on effect on the k-mers used in the assembly. For time purposes we have selected a k-mer of 55 insted of spades' automatic test of multiple.
 
 Eventually, after spades finishes running there will be several files will be obtained in the directory the most important for our purposes are:
 
@@ -143,11 +145,10 @@ The outcome of de novo assembly is a set of contigs and a scaffolded sequence. I
 
 - Maximum/median/average contig size. Usually computed after removing the smallest contigs (e.g. discarding all contigs shorter than 150 bp).
 
-We can compute these statistics with the help of a tool called quast (made by the same developers as spades). To get the statistics first navigate to the assembly directory and run `quast`
+We can compute these statistics with the help of a tool called QUAST (made by the same developers as spades). To get the statistics first navigate to the assembly directory and run `quast`
 
 ```
-cd sample1
-quast -r ../tb.fasta -o quast/short short/scaffolds.fasta 
+quast -r tb.fasta -o quast/short short/scaffolds.fasta 
 ```
 
 After it has finished you can examine the outputs. To view the result, open up the html in the browser of your choice.
@@ -170,7 +171,7 @@ More data requires more memory too, as the lower graph demonstrates. Again the f
 You can also assess genome assembly quality using BUSCO (Benchmarking Universal Single-Copy Orthologs). BUSCO evaluates how complete your genome, gene set, or transcriptome is by checking for the presence of conserved genes that are expected to appear as single copies in nearly all organisms within a given lineage. It provides a detailed breakdown of complete, fragmented, and missing orthologs, helping you identify potential gaps or redundancies in your assembly. This makes BUSCO a widely trusted tool for validating both the accuracy and biological completeness of genomic data.
 
 
-Lets run BUSCO now
+Let's run BUSCO now
 
 ```
 conda activate busco
@@ -201,9 +202,9 @@ GapCloser uses paired-end reads where each pair has a known insert size (e.g. ~3
 
 Then, GapCloser collects reads whose pairs span these gaps and tries to reconstruct the missing sequence by overlapping them in the gap region — replacing the Ns with real bases based on the consensus of those bridging reads.
 
-Lets run gap closer to see if we can improve the asesmbly. First we need to create a config file, we have provided for you a sample one that needs editing, if you would like to know more, check out how to make one you can look at the [manual](https://www.animalgenome.org/bioinfo/resources/manuals/SOAP.html). You would need to find your insert size if you were to make one, this is done by mapping the reads to a reference and using `picard CollectInsertSizeMetrics`.
+Let's run gap closer to see if we can improve the asesmbly. First we need to create a config file, we have provided for you a sample one that needs editing, if you would like to know more, check out how to make one you can look at the [manual](https://www.animalgenome.org/bioinfo/resources/manuals/SOAP.html). You would need to find your insert size if you were to make one, this is done by mapping the reads to a reference and using `picard CollectInsertSizeMetrics`.
 
-Lets edit the config file:
+Let's edit the config file:
 
 ```
 nano gapclosing.txt
@@ -407,7 +408,7 @@ quast -o quast/hybrid/masurca CA.mr.55.17.15.0.02/primary.genome.scf.fasta
 
 Run the polishing step to see if you can get an even better N50 score or less contigs, and then compare to the existing reference using quast.
 
-From these results we can see we have an extremely good assembly, without even starting the full polishing process yet. Overall hybrid assembly is the best approach to building a genome assembly, however most tools now involve more complicated steps when it comes to the hybrid approach. One of the best tools out there is called [autocycler](https://github.com/rrwick/Autocycler), which runs multiple Kmers to utilise the best one, as well as subsetting the long read and using multiple long read assemblers in order to combine and cluster them together. In the interest of time and not making everyone wait 2 days, this is a quick overview of the tools we use to create a reference and can help guide you in the steps to take for your genome, as every genome will be different.
+From these results we can see we have an extremely good assembly, without even starting the full polishing process yet. Overall hybrid assembly is the best approach to building a genome assembly, however most tools now involve more complicated steps when it comes to the hybrid approach. One of the best tools out there is called [autocycler](https://github.com/rrwick/Autocycler), which runs multiple k-mers to utilise the best one, as well as subsetting the long read and using multiple long read assemblers in order to combine and cluster them together. In the interest of time and not making everyone wait 2 days, this is a quick overview of the tools we use to create a reference and can help guide you in the steps to take for your genome, as every genome will be different.
 
 # Overview
 
